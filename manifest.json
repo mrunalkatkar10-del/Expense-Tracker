@@ -1,0 +1,16 @@
+{
+  "name": "Student Expense Tracker",
+  "short_name": "ExpenseApp",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#4a00e0",
+  "theme_color": "#4a00e0",
+  "description": "Track your daily expenses smartly",
+  "icons": [
+    {
+      "src": "https://cdn-icons-png.flaticon.com/512/2460/2460471.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
