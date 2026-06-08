@@ -4,134 +4,181 @@
     <title>Student Expense Tracker</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
+      * { margin: 0; padding: 0; box-sizing: border-box; }
       body {
-        background-color: #f0f4ff;
-        font-family: Arial, sans-serif;
-        text-align: center;
-        padding: 40px;
+        background: linear-gradient(135deg, #4a00e0, #8e2de2);
+        font-family: 'Arial', sans-serif;
+        min-height: 100vh;
+        padding: 30px 20px;
       }
-      h1 { color: #4a00e0; }
+      .card {
+        background: white;
+        border-radius: 20px;
+        padding: 30px;
+        max-width: 500px;
+        margin: 0 auto 20px auto;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+      }
+      h1 {
+        color: #4a00e0;
+        font-size: 26px;
+        margin-bottom: 5px;
+      }
+      .subtitle {
+        color: #888;
+        font-size: 14px;
+        margin-bottom: 20px;
+      }
+      .input-row {
+        display: flex;
+        gap: 10px;
+        margin-bottom: 15px;
+      }
       input {
-        padding: 10px;
-        width: 200px;
-        border: 2px solid #4a00e0;
-        border-radius: 8px;
-        margin: 5px;
+        flex: 1;
+        padding: 12px;
+        border: 2px solid #e0e0e0;
+        border-radius: 10px;
+        font-size: 14px;
+        outline: none;
       }
-      button {
-        padding: 10px 20px;
-        background-color: #4a00e0;
+      input:focus { border-color: #4a00e0; }
+      button.add-btn {
+        padding: 12px 20px;
+        background: linear-gradient(135deg, #4a00e0, #8e2de2);
         color: white;
         border: none;
-        border-radius: 8px;
+        border-radius: 10px;
         cursor: pointer;
-      }
-      ul { list-style: none; padding: 0; margin-top: 20px; }
-      li {
-        background: white;
-        margin: 8px auto;
-        padding: 10px;
-        width: 300px;
-        border-radius: 8px;
-        box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-      }
-      #total {
-        font-size: 22px;
+        font-size: 14px;
         font-weight: bold;
-        color: #4a00e0;
-        margin-top: 20px;
       }
-      canvas {
-        max-width: 400px;
-        margin: 30px auto;
-        display: block;
+      .total-box {
+        background: linear-gradient(135deg, #4a00e0, #8e2de2);
+        color: white;
+        border-radius: 15px;
+        padding: 20px;
+        text-align: center;
+        margin-bottom: 20px;
+      }
+      .total-box p { font-size: 14px; opacity: 0.8; }
+      .total-box h2 { font-size: 36px; font-weight: bold; }
+      ul { list-style: none; }
+      li {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 12px 15px;
+        border-radius: 10px;
+        margin-bottom: 8px;
+        background: #f8f4ff;
+        border-left: 4px solid #4a00e0;
+      }
+      .exp-name { font-weight: bold; color: #333; }
+      .exp-amount { color: #4a00e0; font-weight: bold; }
+      .del-btn {
+        background: none;
+        border: none;
+        cursor: pointer;
+        font-size: 16px;
+      }
+      canvas { margin-top: 10px; }
+      .empty {
+        color: #aaa;
+        text-align: center;
+        padding: 20px;
+        font-size: 14px;
       }
     </style>
   </head>
   <body>
 
-    <h1>💰 Student Expense Tracker</h1>
+    <div class="card">
+      <h1>💰 Expense Tracker</h1>
+      <p class="subtitle">Track your daily spending smartly</p>
 
-    <input type="text" id="expenseName" placeholder="Expense (e.g. Lunch)" />
-    <input type="number" id="expenseAmount" placeholder="Amount (₹)" />
-    <button onclick="addExpense()">Add Expense</button>
+      <div class="total-box">
+        <p>Total Spent</p>
+        <h2 id="total">₹0</h2>
+      </div>
 
-    <ul id="expenseList"></ul>
-    <p id="total">Total Spent: ₹0</p>
+      <div class="input-row">
+        <input type="text" id="expenseName" placeholder="Expense name" />
+        <input type="number" id="expenseAmount" placeholder="₹ Amount" />
+      </div>
+      <button class="add-btn" onclick="addExpense()">+ Add Expense</button>
 
-    <canvas id="expenseChart"></canvas>
+      <ul id="expenseList" style="margin-top:20px;"></ul>
+    </div>
+
+    <div class="card">
+      <h1 style="margin-bottom:15px;">📊 Spending Chart</h1>
+      <canvas id="expenseChart"></canvas>
+      <p class="empty" id="emptyMsg">Add expenses to see chart</p>
+    </div>
 
     <script>
       let expenses = JSON.parse(localStorage.getItem("expenses")) || [];
       let chart = null;
 
       function renderChart() {
-        let labels = expenses.map(e => e.name);
-        let data = expenses.map(e => Number(e.amount));
-
+        let empty = document.getElementById("emptyMsg");
+        if (expenses.length === 0) {
+          empty.style.display = "block";
+          if (chart) { chart.destroy(); chart = null; }
+          return;
+        }
+        empty.style.display = "none";
         if (chart) chart.destroy();
-
-        if (expenses.length === 0) return;
-
         chart = new Chart(document.getElementById("expenseChart"), {
           type: "pie",
           data: {
-            labels: labels,
+            labels: expenses.map(e => e.name),
             datasets: [{
-              data: data,
-              backgroundColor: [
-                "#4a00e0","#ff6384","#36a2eb",
-                "#ffce56","#4bc0c0","#ff9f40"
-              ]
+              data: expenses.map(e => Number(e.amount)),
+              backgroundColor: ["#4a00e0","#8e2de2","#ff6384","#36a2eb","#ffce56","#4bc0c0"]
             }]
           }
         });
       }
 
       function renderExpenses() {
-        document.getElementById("expenseList").innerHTML = "";
+        let list = document.getElementById("expenseList");
+        list.innerHTML = "";
         let total = 0;
+        if (expenses.length === 0) {
+          list.innerHTML = '<p class="empty">No expenses yet!</p>';
+        }
         expenses.forEach(function(exp, index) {
           let li = document.createElement("li");
-          li.innerText = exp.name + " — ₹" + exp.amount;
-
-          let deleteBtn = document.createElement("button");
-          deleteBtn.innerText = "❌";
-          deleteBtn.style.marginLeft = "10px";
-          deleteBtn.style.background = "red";
-          deleteBtn.style.border = "none";
-          deleteBtn.style.borderRadius = "5px";
-          deleteBtn.style.color = "white";
-          deleteBtn.style.cursor = "pointer";
-
-          deleteBtn.onclick = function() {
-            expenses.splice(index, 1);
-            localStorage.setItem("expenses", JSON.stringify(expenses));
-            renderExpenses();
-            renderChart();
-          }
-
-          li.appendChild(deleteBtn);
-          document.getElementById("expenseList").appendChild(li);
+          li.innerHTML = `
+            <span class="exp-name">${exp.name}</span>
+            <span class="exp-amount">₹${exp.amount}</span>
+            <button class="del-btn" onclick="deleteExpense(${index})">❌</button>
+          `;
+          list.appendChild(li);
           total += Number(exp.amount);
         });
-        document.getElementById("total").innerText = "Total Spent: ₹" + total;
+        document.getElementById("total").innerText = "₹" + total;
         renderChart();
+      }
+
+      function deleteExpense(index) {
+        expenses.splice(index, 1);
+        localStorage.setItem("expenses", JSON.stringify(expenses));
+        renderExpenses();
       }
 
       function addExpense() {
         let name = document.getElementById("expenseName").value;
         let amount = document.getElementById("expenseAmount").value;
-
         if (name === "" || amount === "") {
           alert("Please fill both fields!");
           return;
         }
-
-        expenses.push({ name: name, amount: amount });
+        expenses.push({ name, amount });
         localStorage.setItem("expenses", JSON.stringify(expenses));
         renderExpenses();
-
         document.getElementById("expenseName").value = "";
         document.getElementById("expenseAmount").value = "";
       }
