@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Student Expense Tracker</title>
+    <style>
+      body {
+        background-color: #f0f4ff;
+        font-family: Arial, sans-serif;
+        text-align: center;
+        padding: 40px;
+      }
+
+      h1 {
+        color: #4a00e0;
+      }
+
+      input {
+        padding: 10px;
+        width: 200px;
+        border: 2px solid #4a00e0;
+        border-radius: 8px;
+        margin: 5px;
+      }
+
+      button {
+        padding: 10px 20px;
+        background-color: #4a00e0;
+        color: white;
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+      }
+
+      ul {
+        list-style: none;
+        padding: 0;
+        margin-top: 20px;
+      }
+
+      li {
+        background: white;
+        margin: 8px auto;
+        padding: 10px;
+        width: 300px;
+        border-radius: 8px;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+      }
+
+      #total {
+        font-size: 22px;
+        font-weight: bold;
+        color: #4a00e0;
+        margin-top: 20px;
+      }
+    </style>
+  </head>
+  <body>
+
+    <h1>💰 Student Expense Tracker</h1>
+
+    <input type="text" id="expenseName" placeholder="Expense (e.g. Lunch)" />
+    <input type="number" id="expenseAmount" placeholder="Amount (₹)" />
+    <button onclick="addExpense()">Add Expense</button>
+
+    <ul id="expenseList"></ul>
+
+    <p id="total">Total Spent: ₹0</p>
+<script>
+      let total = 0;
+
+      function addExpense() {
+  let name = document.getElementById("expenseName").value;
+  let amount = document.getElementById("expenseAmount").value;
+
+  if (name === "" || amount === "") {
+    alert("Please fill both fields!");
+    return;
+  }
+
+  // Create list item
+  let li = document.createElement("li");
+  li.innerText = name + " — ₹" + amount;
+
+  // Create delete button
+  let deleteBtn = document.createElement("button");
+  deleteBtn.innerText = "❌";
+  deleteBtn.style.marginLeft = "10px";
+  deleteBtn.style.background = "red";
+  deleteBtn.style.border = "none";
+  deleteBtn.style.borderRadius = "5px";
+  deleteBtn.style.color = "white";
+  deleteBtn.style.cursor = "pointer";
+
+  deleteBtn.onclick = function() {
+    total = total - Number(amount);
+    document.getElementById("total").innerText = "Total Spent: ₹" + total;
+    li.remove();
+  }
+
+  li.appendChild(deleteBtn);
+  document.getElementById("expenseList").appendChild(li);
+
+  // Update total
+  total = total + Number(amount);
+  document.getElementById("total").innerText = "Total Spent: ₹" + total;
+
+  // Clear inputs
+  document.getElementById("expenseName").value = "";
+  document.getElementById("expenseAmount").value = "";
+}
+    </script>
+
+  </body>
+</html>
+
+  </body>
+</html>
