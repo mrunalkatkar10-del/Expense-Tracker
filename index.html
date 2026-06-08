@@ -2,6 +2,7 @@
 <html>
   <head>
     <title>Student Expense Tracker</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
       body {
         background-color: #f0f4ff;
@@ -9,11 +10,7 @@
         text-align: center;
         padding: 40px;
       }
-
-      h1 {
-        color: #4a00e0;
-      }
-
+      h1 { color: #4a00e0; }
       input {
         padding: 10px;
         width: 200px;
@@ -21,7 +18,6 @@
         border-radius: 8px;
         margin: 5px;
       }
-
       button {
         padding: 10px 20px;
         background-color: #4a00e0;
@@ -30,13 +26,7 @@
         border-radius: 8px;
         cursor: pointer;
       }
-
-      ul {
-        list-style: none;
-        padding: 0;
-        margin-top: 20px;
-      }
-
+      ul { list-style: none; padding: 0; margin-top: 20px; }
       li {
         background: white;
         margin: 8px auto;
@@ -45,12 +35,16 @@
         border-radius: 8px;
         box-shadow: 0 2px 5px rgba(0,0,0,0.1);
       }
-
       #total {
         font-size: 22px;
         font-weight: bold;
         color: #4a00e0;
         margin-top: 20px;
+      }
+      canvas {
+        max-width: 400px;
+        margin: 30px auto;
+        display: block;
       }
     </style>
   </head>
@@ -63,63 +57,87 @@
     <button onclick="addExpense()">Add Expense</button>
 
     <ul id="expenseList"></ul>
-
     <p id="total">Total Spent: ₹0</p>
-<script>
-  let expenses = JSON.parse(localStorage.getItem("expenses")) || [];
-  let total = 0;
 
-  function renderExpenses() {
-    document.getElementById("expenseList").innerHTML = "";
-    total = 0;
-    expenses.forEach(function(exp, index) {
-      let li = document.createElement("li");
-      li.innerText = exp.name + " — ₹" + exp.amount;
+    <canvas id="expenseChart"></canvas>
 
-      let deleteBtn = document.createElement("button");
-      deleteBtn.innerText = "❌";
-      deleteBtn.style.marginLeft = "10px";
-      deleteBtn.style.background = "red";
-      deleteBtn.style.border = "none";
-      deleteBtn.style.borderRadius = "5px";
-      deleteBtn.style.color = "white";
-      deleteBtn.style.cursor = "pointer";
+    <script>
+      let expenses = JSON.parse(localStorage.getItem("expenses")) || [];
+      let chart = null;
 
-      deleteBtn.onclick = function() {
-        expenses.splice(index, 1);
-        localStorage.setItem("expenses", JSON.stringify(expenses));
-        renderExpenses();
+      function renderChart() {
+        let labels = expenses.map(e => e.name);
+        let data = expenses.map(e => Number(e.amount));
+
+        if (chart) chart.destroy();
+
+        if (expenses.length === 0) return;
+
+        chart = new Chart(document.getElementById("expenseChart"), {
+          type: "pie",
+          data: {
+            labels: labels,
+            datasets: [{
+              data: data,
+              backgroundColor: [
+                "#4a00e0","#ff6384","#36a2eb",
+                "#ffce56","#4bc0c0","#ff9f40"
+              ]
+            }]
+          }
+        });
       }
 
-      li.appendChild(deleteBtn);
-      document.getElementById("expenseList").appendChild(li);
-      total += Number(exp.amount);
-    });
-    document.getElementById("total").innerText = "Total Spent: ₹" + total;
-  }
+      function renderExpenses() {
+        document.getElementById("expenseList").innerHTML = "";
+        let total = 0;
+        expenses.forEach(function(exp, index) {
+          let li = document.createElement("li");
+          li.innerText = exp.name + " — ₹" + exp.amount;
 
-  function addExpense() {
-    let name = document.getElementById("expenseName").value;
-    let amount = document.getElementById("expenseAmount").value;
+          let deleteBtn = document.createElement("button");
+          deleteBtn.innerText = "❌";
+          deleteBtn.style.marginLeft = "10px";
+          deleteBtn.style.background = "red";
+          deleteBtn.style.border = "none";
+          deleteBtn.style.borderRadius = "5px";
+          deleteBtn.style.color = "white";
+          deleteBtn.style.cursor = "pointer";
 
-    if (name === "" || amount === "") {
-      alert("Please fill both fields!");
-      return;
-    }
+          deleteBtn.onclick = function() {
+            expenses.splice(index, 1);
+            localStorage.setItem("expenses", JSON.stringify(expenses));
+            renderExpenses();
+            renderChart();
+          }
 
-    expenses.push({ name: name, amount: amount });
-    localStorage.setItem("expenses", JSON.stringify(expenses));
-    renderExpenses();
+          li.appendChild(deleteBtn);
+          document.getElementById("expenseList").appendChild(li);
+          total += Number(exp.amount);
+        });
+        document.getElementById("total").innerText = "Total Spent: ₹" + total;
+        renderChart();
+      }
 
-    document.getElementById("expenseName").value = "";
-    document.getElementById("expenseAmount").value = "";
-  }
+      function addExpense() {
+        let name = document.getElementById("expenseName").value;
+        let amount = document.getElementById("expenseAmount").value;
 
-  renderExpenses();
-</script>
+        if (name === "" || amount === "") {
+          alert("Please fill both fields!");
+          return;
+        }
 
-  </body>
-</html>
+        expenses.push({ name: name, amount: amount });
+        localStorage.setItem("expenses", JSON.stringify(expenses));
+        renderExpenses();
+
+        document.getElementById("expenseName").value = "";
+        document.getElementById("expenseAmount").value = "";
+      }
+
+      renderExpenses();
+    </script>
 
   </body>
 </html>
