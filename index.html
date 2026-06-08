@@ -66,49 +66,57 @@
 
     <p id="total">Total Spent: ₹0</p>
 <script>
-      let total = 0;
+  let expenses = JSON.parse(localStorage.getItem("expenses")) || [];
+  let total = 0;
 
-      function addExpense() {
-  let name = document.getElementById("expenseName").value;
-  let amount = document.getElementById("expenseAmount").value;
+  function renderExpenses() {
+    document.getElementById("expenseList").innerHTML = "";
+    total = 0;
+    expenses.forEach(function(exp, index) {
+      let li = document.createElement("li");
+      li.innerText = exp.name + " — ₹" + exp.amount;
 
-  if (name === "" || amount === "") {
-    alert("Please fill both fields!");
-    return;
-  }
+      let deleteBtn = document.createElement("button");
+      deleteBtn.innerText = "❌";
+      deleteBtn.style.marginLeft = "10px";
+      deleteBtn.style.background = "red";
+      deleteBtn.style.border = "none";
+      deleteBtn.style.borderRadius = "5px";
+      deleteBtn.style.color = "white";
+      deleteBtn.style.cursor = "pointer";
 
-  // Create list item
-  let li = document.createElement("li");
-  li.innerText = name + " — ₹" + amount;
+      deleteBtn.onclick = function() {
+        expenses.splice(index, 1);
+        localStorage.setItem("expenses", JSON.stringify(expenses));
+        renderExpenses();
+      }
 
-  // Create delete button
-  let deleteBtn = document.createElement("button");
-  deleteBtn.innerText = "❌";
-  deleteBtn.style.marginLeft = "10px";
-  deleteBtn.style.background = "red";
-  deleteBtn.style.border = "none";
-  deleteBtn.style.borderRadius = "5px";
-  deleteBtn.style.color = "white";
-  deleteBtn.style.cursor = "pointer";
-
-  deleteBtn.onclick = function() {
-    total = total - Number(amount);
+      li.appendChild(deleteBtn);
+      document.getElementById("expenseList").appendChild(li);
+      total += Number(exp.amount);
+    });
     document.getElementById("total").innerText = "Total Spent: ₹" + total;
-    li.remove();
   }
 
-  li.appendChild(deleteBtn);
-  document.getElementById("expenseList").appendChild(li);
+  function addExpense() {
+    let name = document.getElementById("expenseName").value;
+    let amount = document.getElementById("expenseAmount").value;
 
-  // Update total
-  total = total + Number(amount);
-  document.getElementById("total").innerText = "Total Spent: ₹" + total;
+    if (name === "" || amount === "") {
+      alert("Please fill both fields!");
+      return;
+    }
 
-  // Clear inputs
-  document.getElementById("expenseName").value = "";
-  document.getElementById("expenseAmount").value = "";
-}
-    </script>
+    expenses.push({ name: name, amount: amount });
+    localStorage.setItem("expenses", JSON.stringify(expenses));
+    renderExpenses();
+
+    document.getElementById("expenseName").value = "";
+    document.getElementById("expenseAmount").value = "";
+  }
+
+  renderExpenses();
+</script>
 
   </body>
 </html>
